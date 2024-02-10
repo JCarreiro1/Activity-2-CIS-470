@@ -67,45 +67,49 @@
     });
 
     function calculateFederalTax(income, filingStatus, mortgage, studentLoan, medicalExpenses) {
-        let taxBrackets = getFederalTaxBrackets(filingStatus);
+        let taxBrackets = getFederalTaxBrackets(filingStatus); //b1 starts
         let federalTax = 0;
-        let taxableIncome = income + getDeductions(filingStatus, mortgage, studentLoan, medicalExpenses);
+        let taxableIncome = income - getDeductions(filingStatus, mortgage, studentLoan, medicalExpenses);
 
-        for (let i = 0; i < taxBrackets.length; i++) {
-            if (taxableIncome > taxBrackets[i].lowerBound) {
-                if (taxBrackets[i].upperBound === null || taxableIncome < taxBrackets[i].upperBound) {
-                    federalTax += (taxableIncome - taxBrackets[1].lowerBound) * taxBrackets[i].rate;
+        for (let i = 0; i < taxBrackets.length; i++) { //b2 starts and ends
+            if (taxableIncome > taxBrackets[i].lowerBound) { // b3
+                if (taxBrackets[i].upperBound === null || taxableIncome < taxBrackets[i].upperBound) {// b5
+                    federalTax += (taxableIncome - taxBrackets[i].lowerBound) * taxBrackets[i].rate;
                     break;
-                } else {
-                    federalTax += (taxBrackets[i].upperBound - taxBrackets[1].lowerBound) * taxBrackets[i].rate;
+                } else { // b6
+                    federalTax += (taxBrackets[i].upperBound - taxBrackets[i].lowerBound) * taxBrackets[i].rate;
                 }
-            } else {
+            } else { // b4
                 break;
             }
         }
-        return federalTax;
+        return federalTax; // b7
     }
     function calculateStateTax(income, filingStatus, mortgage, studentLoan, medicalExpenses) {
         // Massachusetts state tax rate is a flat rate of 5%
         const stateTaxRateMA = 0.05;
-        let stateTaxableIncome = income + getDeductions(filingStatus, mortgage, studentLoan, medicalExpenses);
+        let stateTaxableIncome = income - getDeductions(filingStatus, mortgage, studentLoan, medicalExpenses);
         // Calculate state tax
         let stateTaxMA = stateTaxableIncome * stateTaxRateMA;
-        return stateTaxMA;
+        if(stateTaxMA > 0){
+            return stateTaxMA;
+        }else{
+            return 0;
+        }
     }
 
     function getFederalTaxBrackets(filingStatus) {
         // Federal tax brackets for the year 2022
-        if (filingStatus === 'individual') {
-            return [
+        if (filingStatus === 'individual') { // b1
+            return [ // b2
                 { lowerBound: 0, upperBound: 10000, rate: 0.10 },
                 { lowerBound: 10001, upperBound: 40000, rate: 0.12 },
                 { lowerBound: 40001, upperBound: 100000, rate: 0.22 },
                 { lowerBound: 100001, upperBound: 200000, rate: 0.24 },
                 { lowerBound: 200001, upperBound: null, rate: 0.32 }
             ];
-        } else if (filingStatus === 'joint') {
-            return [
+        } else if (filingStatus === 'joint') { // b3
+            return [ // b4
                 { lowerBound: 0, upperBound: 20000, rate: 0.10 },
                 { lowerBound: 20001, upperBound: 80000, rate: 0.12 },
                 { lowerBound: 80001, upperBound: 200000, rate: 0.22 },
@@ -116,11 +120,11 @@
     }
 
     function getDeductions(filingStatus, mortgage, studentLoan, medicalExpenses) {
-        let deductions = 10000;
+        let deductions = 10000; //b1 start
         if (filingStatus === 'joint') {
-            deductions += 5000;
+            deductions += 5000; // b2
         }
-        deductions += mortgage + studentLoan - medicalExpenses;
+        deductions += mortgage + studentLoan - medicalExpenses; // b3
         return deductions;
     }
 </script>
